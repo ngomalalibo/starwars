@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @OpenAPIDefinition(info = @Info(title = "Star Wars API Documentation",
@@ -14,6 +15,12 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @SpringBootApplication
 public class MoviesApplication extends SpringBootServletInitializer
 {
+    @Override
+    protected SpringApplicationBuilder configure(
+            SpringApplicationBuilder builder)
+    {
+        return builder.sources(MoviesApplication.class);
+    }
     
     public static void main(String[] args)
     {
