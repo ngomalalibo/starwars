@@ -19,6 +19,14 @@ target/
 *.iml
 *.ipr
 
+### added by Ngo Alalibo
+*.pem
+*.ppk
+*.txt
+*.JPG
+*.pdf
+*.csv
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
