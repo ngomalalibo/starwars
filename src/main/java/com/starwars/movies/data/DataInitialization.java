@@ -1,17 +1,12 @@
 package com.starwars.movies.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,9 +29,8 @@ public class DataInitialization
 {
     private static String MOVIE_API = "https://swapi.dev/api/";
     
-    /*@Autowired
-    RestTemplate restTemplate;*/
-    RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    RestTemplate restTemplate;
     
     @Bean
     CommandLineRunner initDatabase()
@@ -153,7 +147,7 @@ public class DataInitialization
         return movies;
     }
     
-    public static void main(String[] args) throws JsonProcessingException
+    /*public static void main(String[] args) throws JsonProcessingException
     {
         DataInitialization d = new DataInitialization();
         List<Movie> movies = d.getMovies();
@@ -166,5 +160,5 @@ public class DataInitialization
         JsonElement je = jp.parse(s);
         String prettyJsonResponse = gson.toJson(je);
         System.out.println("Movie: " + prettyJsonResponse);
-    }
+    }*/
 }
