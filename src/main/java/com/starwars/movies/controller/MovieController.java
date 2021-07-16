@@ -31,7 +31,7 @@ public class MovieController
     /**
      * returns all movies. It includes the following details for each movie: title, opening crawls, comments, a count of comments and list of characters.
      */
-    @GetMapping("/")
+    @GetMapping({"/", ""})
     public ResponseEntity<List<Movie>> getAllMovies()
     {
         return ResponseEntity.ok(movieService.findAll());

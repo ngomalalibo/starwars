@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Movie entity
@@ -22,7 +24,7 @@ public class Movie
     private int episode_id;
     private String opening_crawl;
     private LocalDate release_date;
-    private List<MovieCharacter> characters = new ArrayList<>();
+    private Set<MovieCharacter> characters = new HashSet<>();
     private List<Comment> comments = new ArrayList<>();
     private long commentCount;
 }

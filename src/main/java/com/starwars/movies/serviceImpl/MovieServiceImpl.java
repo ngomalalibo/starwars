@@ -10,7 +10,6 @@ import com.starwars.movies.utility.ConvertToInchesAndFeet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,11 +26,7 @@ public class MovieServiceImpl implements MovieService
     
     public List<Movie> findAll()
     {
-        System.out.println("Get all movies");
-        List<Movie> all = dataInitialization.getMovies().stream().map(this::getMovieDetails).collect(Collectors.toList());
-        System.out.println("Retrieved all movies");
-        System.out.println("Name: " + all.get(0).getTitle());
-        return all;
+        return dataInitialization.getMovies().stream().map(this::getMovieDetails).collect(Collectors.toList());
     }
     
     @Override

@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Movie character entity
@@ -21,6 +21,6 @@ public class MovieCharacter
     private int height;
     private double heightInches;
     private double heightFeet;
-    private List<String> movie_ids = new ArrayList<>();
+    private Set<String> movie_ids = new HashSet<>();
     private String url;
 }
