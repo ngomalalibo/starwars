@@ -23,18 +23,18 @@ public class MovieCharacterService
     public List<MovieCharacter> getMovieChars(String id, String sortBy, String direction, String gender)
     {
         Movie movie = dataInitialization.getMovies().stream().filter(m -> m.getMovie_id().equals(id)).findAny().orElse(null);
-    
+        
         List<MovieCharacter> characters = new ArrayList<>();
-    
+        
         if (movie != null)
         {
             if (gender != null)
             {
                 characters = movie.getCharacters().stream().filter(c -> c.getGender().equalsIgnoreCase(gender)).collect(Collectors.toList());
             }
-        
+            
             movie.setCharacters(characters);
-        
+            
             if (sortBy.equals("name"))
             {
                 if (direction.equalsIgnoreCase("asc"))
@@ -47,7 +47,7 @@ public class MovieCharacterService
                 }
             }
             else if (sortBy.equals("height"))
-        
+            
             {
                 if (direction.equalsIgnoreCase("asc"))
                 {

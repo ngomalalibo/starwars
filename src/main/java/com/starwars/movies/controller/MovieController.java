@@ -6,7 +6,6 @@ import com.starwars.movies.entity.MovieCharacter;
 import com.starwars.movies.repository.CommentRepository;
 import com.starwars.movies.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,8 +85,8 @@ public class MovieController
      * returns a comments for a particular movie sorted in descending order. (ie most recent comments first)
      */
     @GetMapping("/{id}/comments")
-    public ResponseEntity<List<Comment>> getAllComments(@PathVariable Long id)
+    public ResponseEntity<List<Comment>> getAllComments(@PathVariable String id)
     {
-        return ResponseEntity.ok(commentRepository.findAll(Sort.by(Sort.Direction.DESC, "dateTime")));
+        return ResponseEntity.ok(commentRepository.getMovieComments(id));
     }
 }

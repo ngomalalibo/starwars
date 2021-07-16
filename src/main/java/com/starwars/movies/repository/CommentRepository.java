@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>
 {
-    @Query(value = "select * from comments c where c.movie_id=:id", nativeQuery = true)
+    @Query(value = "select * from comments c where c.movie_id=:id ORDER BY c.date_time DESC", nativeQuery = true)
     List<Comment> getMovieComments(@Param("id") String id);
 }

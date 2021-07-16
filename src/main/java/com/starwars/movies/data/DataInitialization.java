@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * This class initializes the application database with data from the https://swapi.dev API.
+ * This class initializes the application with data from the https://swapi.dev API.
  */
 @Slf4j
 @Getter
@@ -48,7 +50,7 @@ public class DataInitialization
         return singleton;
     }
     
-    /*@Bean
+    @Bean
     CommandLineRunner initDatabase()
     {
         return args ->
@@ -57,7 +59,7 @@ public class DataInitialization
             DataInitialization.getInstance();
             log.info("Data initialized");
         };
-    }*/
+    }
     
     /**
      * Gets the data from https://swapi.dev and transforms it into our Movie entity
@@ -138,7 +140,6 @@ public class DataInitialization
                                 fCount++;
                             }
                         }
-                        
                         
                         movie.getCharacters().add(mc); // movie character details added to movie details
                         
