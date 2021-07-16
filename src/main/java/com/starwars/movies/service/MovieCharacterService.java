@@ -72,6 +72,8 @@ public class MovieCharacterService
             }
             characters.stream().peek(this::getMovieCharacterDetails); // sort before getting details. more performant
         }
+        
+        
         return characters;
     }
     
@@ -82,13 +84,13 @@ public class MovieCharacterService
         return character;
     }
     
-    public long getMovieCharTotalHeightForGenderCM(String id, String sortBy, String direction, String gender)
+    public int getMovieCharTotalHeightForGenderCM(String id, String sortBy, String direction, String gender)
     {
         Set<MovieCharacter> movieCharacters = movieService.findMovieCharacters(id, sortBy, direction, gender);
         return movieCharacters.stream().map(MovieCharacter::getHeight).reduce(Integer::sum).orElse(0);
     }
     
-    public long getMovieCharTotalForGender(String id, String sortBy, String direction, String gender)
+    public int getMovieCharTotalForGender(String id, String sortBy, String direction, String gender)
     {
         return movieService.findMovieCharacters(id, sortBy, direction, gender).size();
     }
