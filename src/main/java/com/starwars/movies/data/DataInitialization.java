@@ -1,115 +1,82 @@
 package com.starwars.movies.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
-import com.starwars.movies.repository.MovieCharRepository;
-import com.starwars.movies.repository.MovieRepository;
-import io.netty.channel.ChannelOption;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * This class initializes the application database with data from the https://swapi.dev API.
  */
 @Slf4j
+@Component
 @Configuration
 public class DataInitialization
 {
-    @Autowired
-    private MovieRepository movieRepository;
-    
-    @Autowired
-    MovieCharRepository movieCharRepository;
-    
-    
     private static String MOVIE_API = "https://swapi.dev/api/";
     
-    HttpClient httpClient = HttpClient.create()
-                                      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                                      .responseTimeout(Duration.ofMillis(5000))
-                                      .doOnConnected(conn ->
-                                                             conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
-                                                                 .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
-    
-    WebClient client = WebClient.builder()
-                                .baseUrl(MOVIE_API)
-                                .defaultCookie("cookieKey", "cookieValue")
-                                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                .defaultUriVariables(Collections.singletonMap("url", MOVIE_API))
-                                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                                .build();
-    
-    // WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = client.post();
+    /*@Autowired
+    RestTemplate restTemplate;*/
+    RestTemplate restTemplate = new RestTemplate();
     
     @Bean
-    @Transactional
     CommandLineRunner initDatabase()
     {
         return args ->
         {
-            log.info("Initializing database.....");
-            getData();
-            log.info("Database initialized");
+            log.info("Initializing data.....");
+            getMovies();
+            log.info("Data initialized");
         };
     }
     
     /**
      * Gets the data from https://swapi.dev and transforms it into our Movie entity
      */
-    public void getData()
+    public List<Movie> getMovies()
     {
-        String output = client.get().uri(MOVIE_API + "/films/").retrieve().bodyToMono(String.class).block();
+        List<Movie> movies = new ArrayList<>();
         
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonParser jp = new JsonParser();
+        ResponseEntity<String> response = restTemplate.getForEntity(MOVIE_API + "/films/", String.class);
         
+        String output = response.getBody();
         
         Movie movie;
         MovieCharacter mc;
+        
         int mCount = 0;
         
         if (output != null)
         {
             JSONObject jsonOutput = new JSONObject(output);
-            /*JsonElement je = jp.parse(output);
-            String prettyJsonResponse = gson.toJson(je);
-            log.info("output -> " + prettyJsonResponse);*/ // prints initial swapi response
             
-            JSONArray movies = jsonOutput.getJSONArray("results"); // retrieves the contents of the results property which is an array
+            JSONArray moviesArray = jsonOutput.getJSONArray("results"); // retrieves the contents of the results property which is an array
             
             JSONObject jsonMovie;
-            while (mCount < movies.length())
+            while (mCount < moviesArray.length())
             {
                 movie = new Movie();
                 
-                JsonElement je = jp.parse(movies.toString());
-                String prettyJsonResponse = gson.toJson(je);
-                //log.info("result>>>>>>>>>>>>: " + prettyJsonResponse);
-                
-                jsonMovie = movies.getJSONObject(mCount); // get each item of the results array
+                jsonMovie = moviesArray.getJSONObject(mCount); // get each item of the results array
                 
                 String title = jsonMovie.getString("title");
                 int episodeId = jsonMovie.getInt("episode_id");
@@ -125,11 +92,14 @@ public class DataInitialization
                     while (count < characters.length())
                     {
                         String embedUrl = characters.getString(count);
-                        String character = client.get().uri(embedUrl).retrieve().bodyToMono(String.class).block();
+                        response = restTemplate.getForEntity(embedUrl, String.class);
+                        String character = response.getBody();
                         
                         JSONObject charJson = new JSONObject(character);
+                        int startIndex = embedUrl.indexOf("people/", 0);
+                        String characterID = embedUrl.substring(startIndex + 7, embedUrl.length() - 1);
                         
-                        long characterID = Long.parseLong(embedUrl.substring(embedUrl.length() - 2, embedUrl.length() - 1));
+                        String url = charJson.getString("url");
                         String name = charJson.getString("name");
                         int height = 0;
                         String height1 = charJson.getString("height");
@@ -139,13 +109,33 @@ public class DataInitialization
                         }
                         String gender = charJson.getString("gender");
                         
-                        mc.setId(characterID);
+                        mc.setMovie_character_id(characterID);
                         mc.setName(name);
                         mc.setHeight(height);
                         mc.setGender(gender);
+                        mc.setUrl(url);
                         
-                        movieCharRepository.save(mc);
-                        movie.getCharacters().add(mc);
+                        JSONArray films = charJson.getJSONArray("films");
+                        int fCount = 0;
+                        if (films != null)
+                        {
+                            while (fCount < films.length())
+                            {
+                                String fUrl = films.getString(fCount);
+                                int startFIndex = fUrl.indexOf("films/", 0);
+                                String film_id = fUrl.substring(startFIndex + 6, fUrl.length() - 1);
+                                mc.getMovie_ids().add(film_id); // add file id to character details
+                                
+                                // response = restTemplate.getForEntity(fUrl, String.class); // already have film details
+                                // String film = response.getBody();
+                                // JSONObject fJson = new JSONObject(film);
+                                
+                                fCount++;
+                            }
+                        }
+                        
+                        
+                        movie.getCharacters().add(mc); // movie character details added to movie details
                         
                         count++;
                     }
@@ -155,9 +145,26 @@ public class DataInitialization
                 movie.setOpening_crawl(openingCrawl);
                 movie.setRelease_date(releaseDate);
                 
-                movieRepository.save(movie);
+                movies.add(movie); // movie with details added to list of movies
                 ++mCount;
             }
         }
+        movies.sort(Comparator.comparing(Movie::getRelease_date, Comparator.naturalOrder())); // list is sorted by release date
+        return movies;
+    }
+    
+    public static void main(String[] args) throws JsonProcessingException
+    {
+        DataInitialization d = new DataInitialization();
+        List<Movie> movies = d.getMovies();
+        
+        Movie movie = movies.get(0);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String s = objectMapper.writeValueAsString(movie.getCharacters());
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(s);
+        String prettyJsonResponse = gson.toJson(je);
+        System.out.println("Movie: " + prettyJsonResponse);
     }
 }

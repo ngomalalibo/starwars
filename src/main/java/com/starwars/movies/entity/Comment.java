@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 
 /**
  * Comment entity
- * */
+ */
 @Data
 @Entity
 @AllArgsConstructor
@@ -19,8 +19,8 @@ public class Comment
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private long movieID;
+    private long comment_id;
+    private long movie_id;
     @Size(min = 2, max = 500)
     private String comment;
     private Long dateTime;

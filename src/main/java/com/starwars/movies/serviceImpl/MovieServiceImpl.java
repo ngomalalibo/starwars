@@ -1,16 +1,13 @@
 package com.starwars.movies.serviceImpl;
 
+import com.starwars.movies.data.DataInitialization;
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
-import com.starwars.movies.model.MovieCharPage;
-import com.starwars.movies.model.MovieCharSearchCriteria;
 import com.starwars.movies.repository.CommentRepository;
-import com.starwars.movies.repository.MovieRepository;
 import com.starwars.movies.service.MovieCharacterService;
 import com.starwars.movies.service.MovieService;
 import com.starwars.movies.utility.ConvertToInchesAndFeet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +17,7 @@ import java.util.stream.Collectors;
 public class MovieServiceImpl implements MovieService
 {
     @Autowired
-    MovieRepository movieRepository;
+    DataInitialization dataInitialization;
     
     @Autowired
     private CommentRepository commentRepository;
@@ -28,43 +25,42 @@ public class MovieServiceImpl implements MovieService
     @Autowired
     MovieCharacterService movieCharacterService;
     
-    public List<Movie> findAll(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria)
+    public List<Movie> findAll()
     {
-        List<Movie> movies = movieRepository.findAll(Sort.by(Sort.Direction.ASC, "release_date"));
-        return movies.stream().map(movie ->
-                                           getMovieDetails(movieCharPage, movieCharSearchCriteria, movie)).collect(Collectors.toList());
+        return dataInitialization.getMovies().stream().map(this::getMovieDetails).collect(Collectors.toList());
     }
     
     @Override
-    public Movie findMovie(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria, long id)
+    public Movie findMovie(String id)
     {
-        Movie movie = movieRepository.findById(id).orElse(new Movie());
-        
-        movie = getMovieDetails(movieCharPage, movieCharSearchCriteria, movie);
+        Movie movie = dataInitialization.getMovies().stream().filter(mv -> mv.getMovie_id().equals(id)).findFirst().orElse(null);
+        if (movie != null)
+        {
+            movie = getMovieDetails(movie);
+        }
         
         return movie;
     }
     
-    Movie getMovieDetails(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria, Movie movie)
+    Movie getMovieDetails(Movie movie)
     {
-        movie.setComments(commentRepository.getMovieComments(movie.getId()));
-        movie.setCommentCount(commentRepository.getMovieComments(movie.getId()).size());
+        movie.setComments(commentRepository.getMovieComments(movie.getMovie_id())); // retrieve movie comments
+        movie.setCommentCount(commentRepository.getMovieComments(movie.getMovie_id()).size()); // retrieve comment count
         
-        List<MovieCharacter> movieChars = movieCharacterService.getMovieChars(movieCharPage, movieCharSearchCriteria, movie.getId());
-        movieChars = movieChars.stream().peek(character ->
-                                              {
-                                                  character.setHeightInches(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderInches(character.getHeight()));
-                                                  character.setHeightFeet(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderFeet(character.getHeight()));
-                                              }).collect(Collectors.toList());
-        
-        movie.setCharacters(movieChars);
+        movie.getCharacters().forEach(character ->
+                                      {
+                                          character.setHeightInches(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderInches(character.getHeight()));
+                                          character.setHeightFeet(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderFeet(character.getHeight()));
+                                      }); // retrieve height in feet and inches
         
         return movie;
     }
     
     @Override
-    public List<MovieCharacter> findMovieCharacters(long id)
+    public List<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender)
     {
-        return null;
+        return movieCharacterService.getMovieChars(id, sortBy, direction, gender);
     }
+    
+    
 }

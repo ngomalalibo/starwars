@@ -2,16 +2,14 @@ package com.starwars.movies.service;
 
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
-import com.starwars.movies.model.MovieCharPage;
-import com.starwars.movies.model.MovieCharSearchCriteria;
 
 import java.util.List;
 
 public interface MovieService
 {
-    List<Movie> findAll(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria);
+    List<Movie> findAll();
     
-    Movie findMovie(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria, long id);
+    Movie findMovie(String id);
     
-    List<MovieCharacter> findMovieCharacters(long id);
+    List<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender);
 }

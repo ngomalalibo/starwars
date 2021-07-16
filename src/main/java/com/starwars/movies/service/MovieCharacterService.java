@@ -1,39 +1,84 @@
 package com.starwars.movies.service;
 
+import com.starwars.movies.data.DataInitialization;
+import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
-import com.starwars.movies.model.MovieCharPage;
-import com.starwars.movies.model.MovieCharSearchCriteria;
-import com.starwars.movies.repository.MovieCharCriteriaRepository;
-import com.starwars.movies.repository.MovieCharRepository;
+import com.starwars.movies.utility.ConvertToInchesAndFeet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieCharacterService
 {
-    
+    @Autowired
+    DataInitialization dataInitialization;
     
     @Autowired
-    MovieCharRepository movieCharRepository;
+    MovieService movieService;
     
-    @Autowired
-    MovieCharCriteriaRepository movieCharCriteriaRepository;
-    
-    public List<MovieCharacter> getMovieChars(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria, long id)
+    public List<MovieCharacter> getMovieChars(String id, String sortBy, String direction, String gender)
     {
-        return movieCharCriteriaRepository.findAllWithFilters(movieCharPage, movieCharSearchCriteria, id).getContent();
+        Movie movie = dataInitialization.getMovies().stream().filter(m -> m.getMovie_id().equals(id)).findAny().orElse(null);
+    
+        List<MovieCharacter> characters = new ArrayList<>();
+    
+        if (movie != null)
+        {
+            if (gender != null)
+            {
+                characters = movie.getCharacters().stream().filter(c -> c.getGender().equalsIgnoreCase(gender)).collect(Collectors.toList());
+            }
+        
+            movie.setCharacters(characters);
+        
+            if (sortBy.equals("name"))
+            {
+                if (direction.equalsIgnoreCase("asc"))
+                {
+                    characters.sort(Comparator.comparing(MovieCharacter::getName, Comparator.naturalOrder()));
+                }
+                else
+                {
+                    characters.sort(Comparator.comparing(MovieCharacter::getName, Comparator.reverseOrder()));
+                }
+            }
+            else if (sortBy.equals("height"))
+        
+            {
+                if (direction.equalsIgnoreCase("asc"))
+                {
+                    characters.sort(Comparator.comparing(MovieCharacter::getHeight, Comparator.naturalOrder()));
+                }
+                else
+                {
+                    characters.sort(Comparator.comparing(MovieCharacter::getHeight, Comparator.reverseOrder()));
+                }
+            }
+            characters.stream().peek(this::getMovieCharacterDetails); // sort before getting details. more performant
+        }
+        return characters;
     }
     
-    public long getMovieCharTotalHeightForGenderCM(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria, long id)
+    public MovieCharacter getMovieCharacterDetails(MovieCharacter character)
     {
-        List<MovieCharacter> content = movieCharCriteriaRepository.findAllWithFilters(movieCharPage, movieCharSearchCriteria, id).getContent();
-        return content.stream().map(MovieCharacter::getHeight).reduce(Integer::sum).orElse(0);
+        character.setHeightInches(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderInches(character.getHeight()));
+        character.setHeightFeet(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderFeet(character.getHeight()));
+        return character;
     }
     
-    public long getMovieCharTotalForGender(MovieCharPage movieCharPage, MovieCharSearchCriteria movieCharSearchCriteria, long id)
+    public long getMovieCharTotalHeightForGenderCM(String id, String sortBy, String direction, String gender)
     {
-        return movieCharCriteriaRepository.findAllWithFilters(movieCharPage, movieCharSearchCriteria, id).getTotalElements();
+        List<MovieCharacter> movieCharacters = movieService.findMovieCharacters(id, sortBy, direction, gender);
+        return movieCharacters.stream().map(MovieCharacter::getHeight).reduce(Integer::sum).orElse(0);
+    }
+    
+    public long getMovieCharTotalForGender(String id, String sortBy, String direction, String gender)
+    {
+        return movieService.findMovieCharacters(id, sortBy, direction, gender).size();
     }
 }
