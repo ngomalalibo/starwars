@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 @Service
 public class MovieServiceImpl implements MovieService
 {
-    private DataInitialization dataInitialization = DataInitialization.getInstance(); // singleton
+    @Autowired
+    private DataInitialization dataInitialization; // singleton
     
     @Autowired
     private CommentRepository commentRepository;

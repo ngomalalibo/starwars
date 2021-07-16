@@ -4,6 +4,7 @@ import com.starwars.movies.entity.Comment;
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
 import com.starwars.movies.repository.CommentRepository;
+import com.starwars.movies.service.MovieCharacterService;
 import com.starwars.movies.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,9 @@ public class MovieController
     
     @Autowired
     private MovieService movieService;
+    
+    @Autowired
+    private MovieCharacterService movieCharacterService;
     
     /**
      * returns all movies. It includes the following details for each movie: title, opening crawls, comments, a count of comments and list of characters.
@@ -79,6 +83,12 @@ public class MovieController
     {
         return ResponseEntity.ok(movieService.findMovieCharacters(id, sortBy, direction, gender));
         
+    }
+    
+    @GetMapping("/character/{cid}")
+    public ResponseEntity<MovieCharacter> getMovieCharacter(@PathVariable String cid)
+    {
+        return ResponseEntity.ok(movieCharacterService.findMovieCharacter(cid));
     }
     
     

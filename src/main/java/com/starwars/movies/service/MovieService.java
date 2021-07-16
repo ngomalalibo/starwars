@@ -13,4 +13,6 @@ public interface MovieService
     Movie findMovie(String id);
     
     Set<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender);
+    
+    
 }

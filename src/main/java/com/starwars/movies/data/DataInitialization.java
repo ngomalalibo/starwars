@@ -1,14 +1,20 @@
 package com.starwars.movies.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
+import com.starwars.movies.service.MovieCharacterService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
@@ -22,42 +28,29 @@ import java.util.List;
 @Slf4j
 @Getter
 @Setter
+@Configuration
+@Component
 public class DataInitialization
 {
-    private static String MOVIE_API = "https://swapi.dev/api/";
+    public static String MOVIE_API = "https://swapi.dev/api/";
     private List<Movie> movies = new ArrayList<>();
     
-    private static DataInitialization singleton = null;
+    @Autowired
+    RestTemplate restTemplate;
     
-    RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    MovieCharacterService movieCharacterService;
     
-    private DataInitialization()
-    {
-        log.info("Initializing data.....");
-        this.setMovies(getData());
-        log.info("Data initialized");
-    }
-    
-    public static DataInitialization getInstance()
-    {
-        if (singleton == null)
-        {
-            singleton = new DataInitialization();
-        }
-        
-        return singleton;
-    }
-    
-    /*@Bean
+    @Bean
     CommandLineRunner initDatabase()
     {
         return args ->
         {
             log.info("Initializing data.....");
-            DataInitialization.getInstance();
+            this.setMovies(getData());
             log.info("Data initialized");
         };
-    }*/
+    }
     
     /**
      * Gets the data from https://swapi.dev and transforms it into our Movie entity
@@ -97,47 +90,13 @@ public class DataInitialization
                 MovieCharacter mc;
                 if (characters != null)
                 {
-                    mc = new MovieCharacter();
                     while (count < characters.length())
                     {
                         String embedUrl = characters.getString(count);
+                        
                         response = restTemplate.getForEntity(embedUrl, String.class);
                         String character = response.getBody();
-                        
-                        JSONObject charJson = new JSONObject(character);
-                        int startIndex = embedUrl.indexOf("people/", 0);
-                        String characterID = embedUrl.substring(startIndex + 7, embedUrl.length() - 1);
-                        
-                        String url = charJson.getString("url");
-                        String name = charJson.getString("name");
-                        int height = 0;
-                        String height1 = charJson.getString("height");
-                        if (StringUtils.isNumeric(height1))
-                        {
-                            height = Integer.parseInt(height1);
-                        }
-                        String gender = charJson.getString("gender");
-                        
-                        mc.setMovie_character_id(characterID);
-                        mc.setName(name);
-                        mc.setHeight(height);
-                        mc.setGender(gender);
-                        mc.setUrl(url);
-                        
-                        JSONArray films = charJson.getJSONArray("films");
-                        int fCount = 0;
-                        if (films != null)
-                        {
-                            while (fCount < films.length())
-                            {
-                                String fUrl = films.getString(fCount);
-                                int startFIndex = fUrl.indexOf("films/", 0);
-                                String film_id = fUrl.substring(startFIndex + 6, fUrl.length() - 1);
-                                mc.getMovie_ids().add(film_id); // add file id to character details
-                                
-                                fCount++;
-                            }
-                        }
+                        mc = movieCharacterService.getMovieCharacterFromJson(character);
                         
                         movie.getCharacters().add(mc); // movie character details added to movie details
                         
@@ -156,5 +115,13 @@ public class DataInitialization
         }
         movies.sort(Comparator.comparing(Movie::getRelease_date, Comparator.naturalOrder())); // list is sorted by release date
         return movies;
+    }
+    
+    public static void main(String[] args) throws JsonProcessingException
+    {
+        String ss = "https://swapi.dev/api/films/1/";
+        int startFIndex = ss.indexOf("films/", 0);
+        String film_id = ss.substring(startFIndex + 6, ss.length() - 1);
+        System.out.println("dd: " + film_id);
     }
 }
