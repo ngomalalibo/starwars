@@ -86,7 +86,6 @@ public class DataInitialization
                 movie = new Movie();
                 
                 jsonMovie = moviesArray.getJSONObject(mCount); // get each item of the results array
-                
                 String title = jsonMovie.getString("title");
                 int episodeId = jsonMovie.getInt("episode_id");
                 String openingCrawl = jsonMovie.getString("opening_crawl");
@@ -146,6 +145,7 @@ public class DataInitialization
                         count++;
                     }
                 }
+                movie.setMovie_id(String.valueOf(episodeId));
                 movie.setTitle(title);
                 movie.setEpisode_id(episodeId);
                 movie.setOpening_crawl(openingCrawl);
