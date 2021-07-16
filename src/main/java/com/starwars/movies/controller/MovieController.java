@@ -79,7 +79,7 @@ public class MovieController
     public ResponseEntity<Set<MovieCharacter>> getMovieCharacters(@PathVariable String id,
                                                                   @RequestParam("sortBy") String sortBy,
                                                                   @RequestParam("direction") String direction,
-                                                                  @RequestParam("gender") String gender)
+                                                                  @RequestParam(value = "gender", required = false) String gender)
     {
         return ResponseEntity.ok(movieService.findMovieCharacters(id, sortBy, direction, gender));
         
