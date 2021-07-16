@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +57,7 @@ public class MovieServiceImpl implements MovieService
     }
     
     @Override
-    public List<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender)
+    public Set<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender)
     {
         return movieCharacterService.getMovieChars(id, sortBy, direction, gender);
     }

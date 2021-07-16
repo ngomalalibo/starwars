@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Controller for Movie (comments, characters, )
@@ -71,10 +72,10 @@ public class MovieController
      * this endpoint returns the list of characters for a movie. It is able to filter by character list and provides the character height in cm, inches and feet
      */
     @GetMapping("/{id}/characters")
-    public ResponseEntity<List<MovieCharacter>> getMovieCharacters(@PathVariable String id,
-                                                                   @RequestParam("sortBy") String sortBy,
-                                                                   @RequestParam("direction") String direction,
-                                                                   @RequestParam("gender") String gender)
+    public ResponseEntity<Set<MovieCharacter>> getMovieCharacters(@PathVariable String id,
+                                                                  @RequestParam("sortBy") String sortBy,
+                                                                  @RequestParam("direction") String direction,
+                                                                  @RequestParam("gender") String gender)
     {
         return ResponseEntity.ok(movieService.findMovieCharacters(id, sortBy, direction, gender));
         

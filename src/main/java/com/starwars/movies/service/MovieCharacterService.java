@@ -7,9 +7,10 @@ import com.starwars.movies.utility.ConvertToInchesAndFeet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,17 +21,17 @@ public class MovieCharacterService
     @Autowired
     MovieService movieService;
     
-    public List<MovieCharacter> getMovieChars(String id, String sortBy, String direction, String gender)
+    public Set<MovieCharacter> getMovieChars(String id, String sortBy, String direction, String gender)
     {
         Movie movie = dataInitialization.getMovies().stream().filter(m -> m.getMovie_id().equals(id)).findAny().orElse(null);
         
-        List<MovieCharacter> characters = new ArrayList<>();
+        Set<MovieCharacter> characters = new HashSet<>();
         
         if (movie != null)
         {
             if (gender != null)
             {
-                characters = movie.getCharacters().stream().filter(c -> c.getGender().equalsIgnoreCase(gender)).collect(Collectors.toList());
+                characters = movie.getCharacters().stream().filter(c -> c.getGender().equalsIgnoreCase(gender)).collect(Collectors.toSet());
             }
             
             movie.setCharacters(characters);
@@ -39,11 +40,11 @@ public class MovieCharacterService
             {
                 if (direction.equalsIgnoreCase("asc"))
                 {
-                    characters.sort(Comparator.comparing(MovieCharacter::getName, Comparator.naturalOrder()));
+                    characters = characters.stream().sorted(Comparator.comparing(MovieCharacter::getName, Comparator.naturalOrder())).collect(Collectors.toCollection(LinkedHashSet::new));
                 }
                 else
                 {
-                    characters.sort(Comparator.comparing(MovieCharacter::getName, Comparator.reverseOrder()));
+                    characters = characters.stream().sorted(Comparator.comparing(MovieCharacter::getName, Comparator.reverseOrder())).collect(Collectors.toCollection(LinkedHashSet::new));
                 }
             }
             else if (sortBy.equals("height"))
@@ -51,11 +52,12 @@ public class MovieCharacterService
             {
                 if (direction.equalsIgnoreCase("asc"))
                 {
-                    characters.sort(Comparator.comparing(MovieCharacter::getHeight, Comparator.naturalOrder()));
+                    characters = characters.stream().sorted(Comparator.comparing(MovieCharacter::getHeight, Comparator.naturalOrder())).collect(Collectors.toCollection(LinkedHashSet::new));
                 }
                 else
                 {
-                    characters.sort(Comparator.comparing(MovieCharacter::getHeight, Comparator.reverseOrder()));
+                    characters = characters.stream().sorted(Comparator.comparing(MovieCharacter::getName, Comparator.reverseOrder())).collect(Collectors.toCollection(LinkedHashSet::new));
+                    // characters.sort(Comparator.comparing(MovieCharacter::getHeight, Comparator.reverseOrder()));
                 }
             }
             characters.stream().peek(this::getMovieCharacterDetails); // sort before getting details. more performant
@@ -72,7 +74,7 @@ public class MovieCharacterService
     
     public long getMovieCharTotalHeightForGenderCM(String id, String sortBy, String direction, String gender)
     {
-        List<MovieCharacter> movieCharacters = movieService.findMovieCharacters(id, sortBy, direction, gender);
+        Set<MovieCharacter> movieCharacters = movieService.findMovieCharacters(id, sortBy, direction, gender);
         return movieCharacters.stream().map(MovieCharacter::getHeight).reduce(Integer::sum).orElse(0);
     }
     

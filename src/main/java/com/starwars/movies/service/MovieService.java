@@ -4,6 +4,7 @@ import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
 
 import java.util.List;
+import java.util.Set;
 
 public interface MovieService
 {
@@ -11,5 +12,5 @@ public interface MovieService
     
     Movie findMovie(String id);
     
-    List<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender);
+    Set<MovieCharacter> findMovieCharacters(String id, String sortBy, String direction, String gender);
 }
