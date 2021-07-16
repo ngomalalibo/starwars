@@ -2,16 +2,13 @@ package com.starwars.movies.data;
 
 import com.starwars.movies.entity.Movie;
 import com.starwars.movies.entity.MovieCharacter;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
@@ -23,30 +20,49 @@ import java.util.List;
  * This class initializes the application database with data from the https://swapi.dev API.
  */
 @Slf4j
-@Component
-@Configuration
+@Getter
+@Setter
 public class DataInitialization
 {
     private static String MOVIE_API = "https://swapi.dev/api/";
+    private List<Movie> movies = new ArrayList<>();
     
-    @Autowired
-    RestTemplate restTemplate;
+    private static DataInitialization singleton = null;
     
-    @Bean
+    RestTemplate restTemplate = new RestTemplate();
+    
+    private DataInitialization()
+    {
+        log.info("Initializing data.....");
+        this.setMovies(getData());
+        log.info("Data initialized");
+    }
+    
+    public static DataInitialization getInstance()
+    {
+        if (singleton == null)
+        {
+            singleton = new DataInitialization();
+        }
+        
+        return singleton;
+    }
+    
+    /*@Bean
     CommandLineRunner initDatabase()
     {
         return args ->
         {
             log.info("Initializing data.....");
-            getMovies();
+            DataInitialization.getInstance();
             log.info("Data initialized");
         };
-    }
+    }*/
     
     /**
      * Gets the data from https://swapi.dev and transforms it into our Movie entity
      */
-    public List<Movie> getMovies()
+    public List<Movie> getData()
     {
         List<Movie> movies = new ArrayList<>();
         
@@ -55,7 +71,6 @@ public class DataInitialization
         String output = response.getBody();
         
         Movie movie;
-        MovieCharacter mc;
         
         int mCount = 0;
         
@@ -80,6 +95,7 @@ public class DataInitialization
                 JSONArray characters = jsonMovie.getJSONArray("characters");  // retrieves the characters endpoint url
                 
                 int count = 0;
+                MovieCharacter mc;
                 if (characters != null)
                 {
                     mc = new MovieCharacter();
@@ -120,10 +136,6 @@ public class DataInitialization
                                 String film_id = fUrl.substring(startFIndex + 6, fUrl.length() - 1);
                                 mc.getMovie_ids().add(film_id); // add file id to character details
                                 
-                                // response = restTemplate.getForEntity(fUrl, String.class); // already have film details
-                                // String film = response.getBody();
-                                // JSONObject fJson = new JSONObject(film);
-                                
                                 fCount++;
                             }
                         }
@@ -146,19 +158,4 @@ public class DataInitialization
         movies.sort(Comparator.comparing(Movie::getRelease_date, Comparator.naturalOrder())); // list is sorted by release date
         return movies;
     }
-    
-    /*public static void main(String[] args) throws JsonProcessingException
-    {
-        DataInitialization d = new DataInitialization();
-        List<Movie> movies = d.getMovies();
-        
-        Movie movie = movies.get(0);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String s = objectMapper.writeValueAsString(movie.getCharacters());
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonParser jp = new JsonParser();
-        JsonElement je = jp.parse(s);
-        String prettyJsonResponse = gson.toJson(je);
-        System.out.println("Movie: " + prettyJsonResponse);
-    }*/
 }

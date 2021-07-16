@@ -16,8 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class MovieServiceImpl implements MovieService
 {
-    @Autowired
-    DataInitialization dataInitialization;
+    private DataInitialization dataInitialization = DataInitialization.getInstance(); // singleton
     
     @Autowired
     private CommentRepository commentRepository;
@@ -27,7 +26,11 @@ public class MovieServiceImpl implements MovieService
     
     public List<Movie> findAll()
     {
-        return dataInitialization.getMovies().stream().map(this::getMovieDetails).collect(Collectors.toList());
+        System.out.println("Get all movies");
+        List<Movie> all = dataInitialization.getMovies().stream().map(this::getMovieDetails).collect(Collectors.toList());
+        System.out.println("Retrieved all movies");
+        System.out.println("Name: " + all.get(0).getTitle());
+        return all;
     }
     
     @Override

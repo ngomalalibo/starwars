@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 @Service
 public class MovieCharacterService
 {
-    @Autowired
-    DataInitialization dataInitialization;
+    private DataInitialization dataInitialization = DataInitialization.getInstance();
     
     @Autowired
     MovieService movieService;
