@@ -42,8 +42,10 @@ public class MovieCharacterService
             {
                 characters = movie.getCharacters().stream().filter(c -> c.getGender().equalsIgnoreCase(gender)).collect(Collectors.toSet());
             }
-            
-            movie.setCharacters(characters);
+            else
+            {
+                characters = movie.getCharacters();
+            }
             
             if (sortBy.equals("name"))
             {
@@ -65,8 +67,7 @@ public class MovieCharacterService
                 }
                 else
                 {
-                    characters = characters.stream().sorted(Comparator.comparing(MovieCharacter::getName, Comparator.reverseOrder())).collect(Collectors.toCollection(LinkedHashSet::new));
-                    // characters.sort(Comparator.comparing(MovieCharacter::getHeight, Comparator.reverseOrder()));
+                    characters = characters.stream().sorted(Comparator.comparing(MovieCharacter::getHeight, Comparator.reverseOrder())).collect(Collectors.toCollection(LinkedHashSet::new));
                 }
             }
             characters.stream().peek(this::getMovieCharacterDetails); // sort before getting details. more performant
