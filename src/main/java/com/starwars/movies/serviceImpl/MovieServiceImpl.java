@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ * Implements the MovieService interface methods findMovie, find all movies and  find movie character.
+ * */
 @Service
 public class MovieServiceImpl implements MovieService
 {

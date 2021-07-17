@@ -5,7 +5,6 @@ I have also documented a few things here to help the understanding the code base
 The Star Wars API has been hosted on Heroku.
 
 Its documentation can be accesses at https://mystarwarsapi.herokuapp.com/api-docs.html
-To get started with the API do the following:
 
 At the beginning of every class in the code base I have provided a /**commented*/ guide on its primary responsibility. This should help you understand the code base and my implementation.
 

@@ -1,5 +1,8 @@
 package com.starwars.movies.utility;
 
+/**
+ * Implements the conversion of cm to inches and feet
+ */
 public class ConvertToInchesAndFeet
 {
     private static final double CM_INCHES = 2.54;

@@ -9,6 +9,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * This is the main class that starts up the application. It also configures the OpenApi (swagger) documentation.
+ */
 @OpenAPIDefinition(info = @Info(title = "Star Wars API Documentation",
         version = "v0.0.1",
         description = "Star ",

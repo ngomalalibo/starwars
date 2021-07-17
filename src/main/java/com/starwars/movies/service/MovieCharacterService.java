@@ -18,6 +18,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ *
+ */
 @Service
 public class MovieCharacterService
 {
@@ -77,6 +81,7 @@ public class MovieCharacterService
         return characters;
     }
     
+    // retrieve height in Inches and feet
     public MovieCharacter getMovieCharacterDetails(MovieCharacter character)
     {
         character.setHeightInches(ConvertToInchesAndFeet.getMovieCharTotalHeightForGenderInches(character.getHeight()));
@@ -84,17 +89,20 @@ public class MovieCharacterService
         return character;
     }
     
+    // After sorting and filtering of movie characters return total height of characters.
     public int getMovieCharTotalHeightForGenderCM(String id, String sortBy, String direction, String gender)
     {
         Set<MovieCharacter> movieCharacters = movieService.findMovieCharacters(id, sortBy, direction, gender);
         return movieCharacters.stream().map(MovieCharacter::getHeight).reduce(Integer::sum).orElse(0);
     }
     
+    // After sorting and filtering of movie characters return number of characters.
     public int getMovieCharTotalForGender(String id, String sortBy, String direction, String gender)
     {
         return movieService.findMovieCharacters(id, sortBy, direction, gender).size();
     }
     
+    // gets movie character from external swapi API
     public MovieCharacter findMovieCharacter(String cid)
     {
         ResponseEntity<String> response = restTemplate.getForEntity(DataInitialization.MOVIE_API + "/people/" + cid, String.class);
@@ -104,6 +112,7 @@ public class MovieCharacterService
         
     }
     
+    // Converts json to MovieCharacter object. also gets character height details
     public MovieCharacter getMovieCharacterFromJson(String character)
     {
         MovieCharacter mc = new MovieCharacter();
